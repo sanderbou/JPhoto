@@ -1,9 +1,3 @@
-// P7 Assignment
-// Elliot Whitehead
-// whitehe
-// 12/2/2012
-// CS160
-
 public class P7 {
 	//class instance variables
 	Picture picture;

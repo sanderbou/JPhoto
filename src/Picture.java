@@ -1,9 +1,3 @@
-// Picture.java
-// Reads and writes .pgm files
-// Original from Fritz Sieker
-// Modified by Chris Wilcox
-// 11/20/2012
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
