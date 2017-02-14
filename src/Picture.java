@@ -5,83 +5,81 @@ import java.io.PrintStream;
 import java.util.Scanner;
 
 public class Picture {
-    
-    // Maximum intensity
-    public static final int MAXVAL = 255;
-
-    // Image data
+    public static final int maxImageIntensity = 255;
     private int[][] image;
 
-    // Get image height
-    public int getHeight() {
+    public int getImageHeight() {
         return image.length;
     }
 
-    // Get image width
-    public int getWidth() {
+    public int getImageWidth() {
         return image[0].length;
     }
 
-    // Get image data
-    public int[][] getData() {
+    public int[][] getImage() {
         return image;
     }
-    
-    // Set image data
-    public void setData(int[][] data) {
-        image = data;
+
+    public void setImage(int[][] image) {
+        this.image = image;
     }
 
-    // Read PGM file
-    public void readPGM(String path) throws Exception {
+    public void loadImage(String imagePath) throws Exception {
+        readImage(imagePath);
+    }
 
-        int width;
-        int height;
-        int maxval;
+    public void readImage(String path) throws Exception{
+
+        int imageWidth;
+        int imageHeigth;
+        int currentImageIntensity;
         try {
-            Scanner in = new Scanner(new File(path));
-            String magic = in.next();
-            if (!magic.equals("P2")) {
-                in.close();
+            Scanner imageScanner = new Scanner(new File(path));
+            String imageLine = imageScanner.next();
+            if (!imageLine.equals("P2")) {
+                imageScanner.close();
                 throw new Exception("ERROR: cannot read .pgm file " + path);
             }
-            width  = in.nextInt();
-            height = in.nextInt();
-            maxval = in.nextInt();
-            image = new int[height][width];
-            for (int y = 0; y < height; y++)
-                for (int x = 0; x < width; x++)
-                    image[y][x] = in.nextInt();
-            in.close();
+            imageWidth  = imageScanner.nextInt();
+            imageHeigth = imageScanner.nextInt();
+            currentImageIntensity = imageScanner.nextInt();
+            image = new int[imageHeigth][imageWidth];
+            for (int heigth = 0; heigth < imageHeigth; heigth++)
+                for (int width = 0; width < imageWidth; width++)
+                    image[heigth][width] = imageScanner.nextInt();
+            imageScanner.close();
         } catch (IOException e) {
             throw new Exception("ERROR: cannot read .pgm file " + path);
         }
-
-        // Scale values to the range 0-MAXVAL
-        if (maxval != MAXVAL)
-            for (int j = 0; j < height; j++)
-                for (int i = 0; i < width; i++)
-                    image[j][i] = (image[j][i] * MAXVAL) / maxval;
-
-        return;
+        updateImageIntensity(currentImageIntensity, imageHeigth, imageWidth);
     }
 
-    // Write PGM file
-    public void writePGM(String path) throws Exception {
-        
-        int height = getHeight();
-        int width  = getWidth();
+    public void updateImageIntensity(int currentImageIntensity, int imageHeigth, int imageWidth){
+        // Scale values to the range 0-maxImageIntensity
+        if (currentImageIntensity != maxImageIntensity)
+            for (int heigth = 0; heigth < imageHeigth; heigth++)
+                for (int width = 0; width < imageWidth; width++)
+                    image[heigth][width] = (image[heigth][width] * maxImageIntensity) / currentImageIntensity;
+    }
+
+    public void saveImage(String imagePath) throws Exception {
+        int imageHeight = getImageHeight();
+        int imageWidth  = getImageWidth();
+        writeImageToFile(imagePath, imageHeight, imageWidth);
+    }
+
+    public void writeImageToFile(String imagePath, int imageHeigth, int imageWidth) throws Exception{
         try {
-            PrintStream output = new PrintStream(new FileOutputStream(path));
+            PrintStream output = new PrintStream(new FileOutputStream(imagePath));
             output.println("P2");
-            output.println(width + " " + height);
-            output.println(MAXVAL);
-            for (int row = 0; row < height; row++)
-                for (int col = 0; col < width; col++)
-                    output.println(image[row][col]); // One pixel per line!
+            output.println(imageWidth + " " + imageHeigth);
+            output.println(maxImageIntensity);
+            for (int heigth = 0; heigth < imageHeigth; heigth++)
+                for (int width = 0; width < imageWidth; width++)
+                    output.println(image[heigth][width]); // One pixel per line!
             output.close();
         } catch (IOException e) {
-            throw new Exception("ERROR: cannot write .pgm file " + path);
+            throw new Exception("ERROR: cannot write .pgm file " + imagePath);
         }
     }
 }

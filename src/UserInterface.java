@@ -14,13 +14,12 @@ public class UserInterface extends JFrame implements ActionListener
 {
     private static final long serialVersionUID = 1L; // get rid of warning
 
-    // Program flags
-    private boolean   mIsInitialized; // GUI initialized?
-    private boolean   mIsDirty;       // image modified?
+    private boolean mIsGUIInitialized;
+    private boolean mIsImageModified;
 
     // Menu items
-    private JMenuItem mOpenFile;
-    private JMenuItem mSaveFile;
+    private JMenuItem mLoadImage;
+    private JMenuItem mSaveImage;
     private JMenuItem mExitCommand;
     private JMenuItem mFlipHorizontal;
     private JMenuItem mFlipVertical;
@@ -29,16 +28,15 @@ public class UserInterface extends JFrame implements ActionListener
     private JMenuItem mDecreaseBrightness;
     private JLabel    mLabel;
 
-    // P7.java object from student
-    private P7 mStudent;
+    private ImageActions mImageActions;
 
     // Array and static code are used to convert a gray scale to RGB
-    private static int[] pgm2RGB;
+    private static int[] imageToColors;
     static {
-        pgm2RGB = new int[256];
+        imageToColors = new int[256];
 
         for (int i = 0; i < 256; i++) {
-            pgm2RGB[i] = (255 << 24) | (i << 16) | (i << 8) | i;
+            imageToColors[i] = (255 << 24) | (i << 16) | (i << 8) | i;
         }
     }
 
@@ -76,27 +74,27 @@ public class UserInterface extends JFrame implements ActionListener
     // one simple way of doing that.
     protected void doAction (ActionEvent actionEvent) throws Exception {
 
-        Object src = actionEvent.getSource();
-        if      (src == mOpenFile)           openFile();
-        else if (src == mSaveFile)           saveFile();
-        else if (src == mExitCommand)        exitGUI();
-        else if (src == mFlipHorizontal)     flipHorizontal();
-        else if (src == mFlipVertical)       flipVertical();
-        else if (src == mNegateImage)        negateImage();
-        else if (src == mIncreaseBrightness) increaseBrightness();
-        else if (src == mDecreaseBrightness) decreaseBrightness();
+        Object clickedMenuItem = actionEvent.getSource();
+        if      (clickedMenuItem == mLoadImage)          openImage();
+        else if (clickedMenuItem == mSaveImage)          saveImage();
+        else if (clickedMenuItem == mExitCommand)        exitGUI();
+        else if (clickedMenuItem == mFlipHorizontal)     flipHorizontal();
+        else if (clickedMenuItem == mFlipVertical)       flipVertical();
+        else if (clickedMenuItem == mNegateImage)        negateImage();
+        else if (clickedMenuItem == mIncreaseBrightness) increaseBrightness();
+        else if (clickedMenuItem == mDecreaseBrightness) decreaseBrightness();
     }
 
     // Override setVisible() to initialize everything the first time the
     // component becomes visible
-    public void setVisible (boolean visible) {
-        if (visible) {
-            if (! mIsInitialized) {
+    public void setVisible (boolean isGUIVisible) {
+        if (isGUIVisible) {
+            if (!mIsGUIInitialized) {
                 startGUI();
-                mIsInitialized = true;
+                mIsGUIInitialized = true;
             }
         }
-        super.setVisible(visible);
+        super.setVisible(isGUIVisible);
     }
 
     // Build the GUI.
@@ -114,8 +112,8 @@ public class UserInterface extends JFrame implements ActionListener
 
     // Exit the GUI
     private void exitGUI() {
-        if (mIsDirty) {
-            if (!getYesNo("Data has not been saved.", "Continue?"))
+        if (mIsImageModified) {
+            if (!getConfirmNoImageSave("Data has not been saved.", "Continue?"))
                 return;
         }
         System.exit(0);
@@ -148,8 +146,8 @@ public class UserInterface extends JFrame implements ActionListener
     // Interestingly, a JMenu is a JMenuItem. Why do you think that is??
     protected JMenu makeFileMenu() {
         JMenu menu  = makeMenu("File", 'F');
-        mOpenFile     = makeMenuItem(menu, "Open...", 'O');
-        mSaveFile     = makeMenuItem(menu, "Save...", 'S');
+        mLoadImage = makeMenuItem(menu, "Open...", 'O');
+        mSaveImage = makeMenuItem(menu, "Save...", 'S');
         mExitCommand  = makeMenuItem(menu, "Exit", 'x');
         return menu;
     }
@@ -187,7 +185,7 @@ public class UserInterface extends JFrame implements ActionListener
     }
 
     // Convenience method to get yes/no from user
-    protected boolean getYesNo (String title, String message) {
+    protected boolean getConfirmNoImageSave(String title, String message) {
         int answer = JOptionPane.showInternalConfirmDialog(getContentPane(),
                 message,
                 title,
@@ -198,113 +196,113 @@ public class UserInterface extends JFrame implements ActionListener
     }
 
     // Open image file
-    private void openFile() throws Exception {
+    private void openImage() throws Exception {
 
         // Data saved?
-        if (mIsDirty) {
-            if (!getYesNo("Open file", "Data has not been saved. Continue?"))
+        if (mIsImageModified) {
+            if (!getConfirmNoImageSave("Open file", "Data has not been saved. Continue?"))
                 return;
         }
 
-        String fileName = selectFile("Select file to open", true);
+        String image = selectFile("Select file to open", true);
 
-        if (fileName != null) {
-            mStudent = new P7();
-            mStudent.readImage(fileName);
+        if (image != null) {
+            mImageActions = new ImageActions();
+            mImageActions.loadImage(image);
             resetImage();
-            mIsDirty = false;
+            mIsImageModified = false;
         }
     }
 
     // Save image file
-    private void saveFile() throws Exception {
-        String fileName = selectFile("Select file name to save", false);
+    private void saveImage() throws Exception {
+        String image = selectFile("Select file name to save", false);
 
-        if (fileName != null) {
-            mStudent.writeImage(fileName);
-            mIsDirty = false;
+        if (image != null) {
+            mImageActions.saveImage(image);
+            mIsImageModified = false;
         }
     }
 
     // Other student methods
     private void flipHorizontal() {
-        if (mStudent != null) {
-            mStudent.horizontalFlip();
+        if (mImageActions != null) {
+            mImageActions.horizontalFlip();
             resetImage();
         }
     }
 
     private void flipVertical() {
-        if (mStudent != null) {
-            mStudent.verticalFlip();
+        if (mImageActions != null) {
+            mImageActions.verticalFlip();
             resetImage();
         }
     }
 
     private void negateImage() {
-        if (mStudent != null) {
-            mStudent.negateImage();
+        if (mImageActions != null) {
+            mImageActions.negateImage();
             resetImage();
         }
     }
 
     private void increaseBrightness() {
-        if (mStudent != null) {
-            mStudent.increaseBrightness();
+        if (mImageActions != null) {
+            mImageActions.increaseBrightness();
             resetImage();
         }
     }
 
     private void decreaseBrightness() {
-        if (mStudent != null) {
-            mStudent.decreaseBrightness();
+        if (mImageActions != null) {
+            mImageActions.decreaseBrightness();
             resetImage();
         }
     }
 
     // File selector
     private String selectFile (String title, boolean open) {
-        String fileName = null;
+        String imagePath = null;
 
-        JFileChooser jfc = new JFileChooser();
-        jfc.setCurrentDirectory(new File("."));
-        jfc.setDialogTitle(title);
+        JFileChooser jFileChooser = new JFileChooser();
+        jFileChooser.setCurrentDirectory(new File("."));
+        jFileChooser.setDialogTitle(title);
 
         int result;
         if (open)
-            result = jfc.showOpenDialog(this);
+            result = jFileChooser.showOpenDialog(this);
         else
-            result = jfc.showSaveDialog(this);
+            result = jFileChooser.showSaveDialog(this);
 
         if (result == JFileChooser.APPROVE_OPTION) {
-            File file = jfc.getSelectedFile();
-            fileName = file.getAbsolutePath();
+            File file = jFileChooser.getSelectedFile();
+            imagePath = file.getAbsolutePath();
         }
 
-        return fileName;
+        return imagePath;
     }
 
     // Reset image
     private void resetImage() {
-        if (mStudent != null) {
+        if (mImageActions != null) {
 
             // Copy the pixel values
-            int image[][] = mStudent.imageData();
-            int rows = image.length;
-            int cols = image[0].length;
-            BufferedImage buffer = new BufferedImage(cols, rows, BufferedImage.TYPE_INT_ARGB);
+            int image[][] = mImageActions.getImage();
+            int imageHeigth = image.length;
+            int imageWidth = image[0].length;
+            BufferedImage buffer = new BufferedImage(imageWidth, imageHeigth, BufferedImage.TYPE_INT_ARGB);
 
 
-            for (int row = 0; row < rows; row++) {
-                for (int col=0; col < cols; col++) {
-                    int rgb = pgm2RGB[image[row][col]];
-                    buffer.setRGB(col, row, rgb);
+            for (int heigth = 0; heigth < imageHeigth; heigth++) {
+                for (int width=0; width < imageWidth; width++) {
+                    int rgb = imageToColors[image[heigth][width]];
+                    buffer.setRGB(width, heigth, rgb);
                 }
             }
 
             ImageIcon imageIcon = new ImageIcon(buffer);
             mLabel.setIcon(imageIcon);
-            mIsDirty = true;
+            mIsImageModified = true;
             pack(); // make window just fit image
         }
     }
