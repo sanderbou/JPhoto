@@ -25,20 +25,16 @@ public class Picture {
     }
 
     public void loadImage(String imagePath) throws Exception {
-        readImage(imagePath);
-    }
-
-    public void readImage(String path) throws Exception{
-
+        //inline (stuk hieronder was eerst doorgeven naar aparte methode)
         int imageWidth;
         int imageHeigth;
         int currentImageIntensity;
         try {
-            Scanner imageScanner = new Scanner(new File(path));
+            Scanner imageScanner = new Scanner(new File(imagePath));
             String imageLine = imageScanner.next();
             if (!imageLine.equals("P2")) {
                 imageScanner.close();
-                throw new Exception("ERROR: cannot read .pgm file " + path);
+                throw new Exception("ERROR: cannot read .pgm file " + imagePath);
             }
             imageWidth  = imageScanner.nextInt();
             imageHeigth = imageScanner.nextInt();
@@ -49,7 +45,7 @@ public class Picture {
                     image[heigth][width] = imageScanner.nextInt();
             imageScanner.close();
         } catch (IOException e) {
-            throw new Exception("ERROR: cannot read .pgm file " + path);
+            throw new Exception("ERROR: cannot read .pgm file " + imagePath);
         }
         updateImageIntensity(currentImageIntensity, imageHeigth, imageWidth);
     }
@@ -65,21 +61,47 @@ public class Picture {
     public void saveImage(String imagePath) throws Exception {
         int imageHeight = getImageHeight();
         int imageWidth  = getImageWidth();
-        writeImageToFile(imagePath, imageHeight, imageWidth);
+        ImageSettings.writeImageToDisk(new ImageSettings(imagePath, imageHeight, imageWidth), this);
     }
 
-    public void writeImageToFile(String imagePath, int imageHeigth, int imageWidth) throws Exception{
-        try {
-            PrintStream output = new PrintStream(new FileOutputStream(imagePath));
-            output.println("P2");
-            output.println(imageWidth + " " + imageHeigth);
-            output.println(maxImageIntensity);
-            for (int heigth = 0; heigth < imageHeigth; heigth++)
-                for (int width = 0; width < imageWidth; width++)
-                    output.println(image[heigth][width]); // One pixel per line!
-            output.close();
-        } catch (IOException e) {
-            throw new Exception("ERROR: cannot write .pgm file " + imagePath);
+    //Extract parameter Object
+    private static class ImageSettings {
+        private final String filePath;
+        private final int imageHeight;
+        private final int imageWidth;
+
+        private ImageSettings(String filePath, int imageHeight, int imageWidth) {
+            this.filePath = filePath;
+            this.imageHeight = imageHeight;
+            this.imageWidth = imageWidth;
+        }
+
+        public String getFilePath() {
+            return filePath;
+        }
+
+        public int getImageHeight() {
+            return imageHeight;
+        }
+
+        public int getImageWidth() {
+            return imageWidth;
+        }
+
+        //Change method signature && Move refactoring && make static/instance
+        public static void writeImageToDisk(ImageSettings imageSettings, Picture picture) throws Exception{
+            try {
+                PrintStream output = new PrintStream(new FileOutputStream(imageSettings.getFilePath()));
+                output.println("P2");
+                output.println(imageSettings.getImageWidth() + " " + imageSettings.getImageHeight());
+                output.println(maxImageIntensity);
+                for (int heigth = 0; heigth < imageSettings.getImageHeight(); heigth++)
+                    for (int width = 0; width < imageSettings.getImageWidth(); width++)
+                        output.println(picture.image[heigth][width]); // One pixel per line!
+                output.close();
+            } catch (IOException e) {
+                throw new Exception("ERROR: cannot write .pgm file " + imageSettings.getFilePath());
+            }
         }
     }
 }

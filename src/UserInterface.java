@@ -73,16 +73,8 @@ public class UserInterface extends JFrame implements ActionListener
     // ways to dispatch from an event to the underlying code. This illustrates
     // one simple way of doing that.
     protected void doAction (ActionEvent actionEvent) throws Exception {
-
         Object clickedMenuItem = actionEvent.getSource();
-        if      (clickedMenuItem == mLoadImage)          openImage();
-        else if (clickedMenuItem == mSaveImage)          saveImage();
-        else if (clickedMenuItem == mExitCommand)        exitGUI();
-        else if (clickedMenuItem == mFlipHorizontal)     flipHorizontal();
-        else if (clickedMenuItem == mFlipVertical)       flipVertical();
-        else if (clickedMenuItem == mNegateImage)        negateImage();
-        else if (clickedMenuItem == mIncreaseBrightness) increaseBrightness();
-        else if (clickedMenuItem == mDecreaseBrightness) decreaseBrightness();
+        new SelectImageAction(clickedMenuItem).invoke();  //Extract method object
     }
 
     // Override setVisible() to initialize everything the first time the
@@ -207,8 +199,8 @@ public class UserInterface extends JFrame implements ActionListener
         String image = selectFile("Select file to open", true);
 
         if (image != null) {
-            mImageActions = new ImageActions();
-            mImageActions.loadImage(image);
+            mImageActions = ImageActions.createImageActions();
+            mImageActions.getSuperClassActions().loadImage(image);
             resetImage();
             mIsImageModified = false;
         }
@@ -219,7 +211,7 @@ public class UserInterface extends JFrame implements ActionListener
         String image = selectFile("Select file name to save", false);
 
         if (image != null) {
-            mImageActions.saveImage(image);
+            mImageActions.getSuperClassActions().saveImage(image);
             mIsImageModified = false;
         }
     }
@@ -227,35 +219,35 @@ public class UserInterface extends JFrame implements ActionListener
     // Other student methods
     private void flipHorizontal() {
         if (mImageActions != null) {
-            mImageActions.horizontalFlip();
+            mImageActions.getSuperClassActions().horizontalFlip();
             resetImage();
         }
     }
 
     private void flipVertical() {
         if (mImageActions != null) {
-            mImageActions.verticalFlip();
+            mImageActions.getSuperClassActions().verticalFlip();
             resetImage();
         }
     }
 
     private void negateImage() {
         if (mImageActions != null) {
-            mImageActions.negateImage();
+            mImageActions.getSuperClassActions().negateImage();
             resetImage();
         }
     }
 
     private void increaseBrightness() {
         if (mImageActions != null) {
-            mImageActions.increaseBrightness();
+            mImageActions.getSuperClassActions().increaseBrightness();
             resetImage();
         }
     }
 
     private void decreaseBrightness() {
         if (mImageActions != null) {
-            mImageActions.decreaseBrightness();
+            mImageActions.getSuperClassActions().decreaseBrightness();
             resetImage();
         }
     }
@@ -287,7 +279,7 @@ public class UserInterface extends JFrame implements ActionListener
         if (mImageActions != null) {
 
             // Copy the pixel values
-            int image[][] = mImageActions.getImage();
+            int image[][] = mImageActions.getSuperClassActions().getImage();
             int imageHeigth = image.length;
             int imageWidth = image[0].length;
             BufferedImage buffer = new BufferedImage(imageWidth, imageHeigth, BufferedImage.TYPE_INT_ARGB);
@@ -309,7 +301,28 @@ public class UserInterface extends JFrame implements ActionListener
 
     // Main program
     public static void main (String[] args) throws IOException {
-        UserInterface gui = new UserInterface();
+        //Introduce builder
+        UserInterface gui = new UserInterfaceBuilder().createUserInterface();
         gui.setVisible(true);
+    }
+
+    //Extract method object
+    private class SelectImageAction {
+        private Object clickedMenuItem;
+
+        public SelectImageAction(Object clickedMenuItem) {
+            this.clickedMenuItem = clickedMenuItem;
+        }
+
+        public void invoke() throws Exception {
+            if      (clickedMenuItem == mLoadImage)          openImage();
+            else if (clickedMenuItem == mSaveImage)          saveImage();
+            else if (clickedMenuItem == mExitCommand)        exitGUI();
+            else if (clickedMenuItem == mFlipHorizontal)     flipHorizontal();
+            else if (clickedMenuItem == mFlipVertical)       flipVertical();
+            else if (clickedMenuItem == mNegateImage)        negateImage();
+            else if (clickedMenuItem == mIncreaseBrightness) increaseBrightness();
+            else if (clickedMenuItem == mDecreaseBrightness) decreaseBrightness();
+        }
     }
 }
