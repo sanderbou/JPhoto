@@ -3,7 +3,7 @@
  */
 public abstract class SuperClassActions {
 
-    public abstract void loadImage(String inFile);
+    public abstract void loadImage(String inFile) throws Exception;
 
     //extract method
     protected abstract void setImageSettings();
