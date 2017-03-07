@@ -23,12 +23,8 @@ public class ImageActions {
 	public class MySuperClassActions extends SuperClassActions {
 		//Alle methodes hieronder ->Extract interface/abstract pull up/down van SuperClassActions
         @Override
-        public void loadImage(String inFile){
-            try {
-                picture.loadImage(inFile);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        public void loadImage(String inFile) throws Exception {
+            picture.loadImage(inFile);
             superClassActions.setImageSettings();
         }
 
