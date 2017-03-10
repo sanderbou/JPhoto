@@ -1,3 +1,5 @@
+package JPhoto;
+
 public class ImageActions {
 	private final MySuperClassActions superClassActions = new MySuperClassActions();
 	Picture picture;
@@ -14,14 +16,14 @@ public class ImageActions {
 		return new ImageActions();
 	}
 
-	//remove middleman, hierdoor moet klasse MySuperClassActions ook public zijn, want anders kan UserInterface er niet bij
+	//remove middleman, hierdoor moet klasse MySuperClassActions ook public zijn, want anders kan JPhoto.UserInterface er niet bij
 	public MySuperClassActions getSuperClassActions() {
 		return superClassActions;
 	}
 
 	//Replace inheritance with delegation
 	public class MySuperClassActions extends SuperClassActions {
-		//Alle methodes hieronder ->Extract interface/abstract pull up/down van SuperClassActions
+		//Alle methodes hieronder ->Extract interface/abstract pull up/down van JPhoto.SuperClassActions
         @Override
         public void loadImage(String inFile){
             try {

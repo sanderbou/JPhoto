@@ -1,4 +1,4 @@
-// UserInterface.java
+package JPhoto;// JPhoto.UserInterface.java
 // User interface for image manipulation
 // Original from Fritz Sieker
 // Modified by Chris Wilcox
