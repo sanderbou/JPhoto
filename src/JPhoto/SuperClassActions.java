@@ -1,3 +1,5 @@
+package JPhoto;
+
 /**
  * Created by Sander on 2-3-2017.
  */
