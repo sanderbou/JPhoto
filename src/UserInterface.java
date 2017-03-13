@@ -103,13 +103,7 @@ public class UserInterface extends JFrame implements ActionListener
     }
 
     // Exit the GUI
-    private void exitGUI() {
-        if (mIsImageModified) {
-            if (!getConfirmNoImageSave("Data has not been saved.", "Continue?"))
-                return;
-        }
-        System.exit(0);
-    }
+
 
 
     // Creates the main panel of the GUI
@@ -313,7 +307,15 @@ public class UserInterface extends JFrame implements ActionListener
         public SelectImageAction(Object clickedMenuItem) {
             this.clickedMenuItem = clickedMenuItem;
         }
-
+		
+		private void exitGUI() {
+        if (mIsImageModified) {
+            if (!getConfirmNoImageSave("Data has not been saved.", "Continue?"))
+                return;
+        }
+        System.exit(0);
+    }
+	
         public void invoke() throws Exception {
             if      (clickedMenuItem == mLoadImage)          openImage();
             else if (clickedMenuItem == mSaveImage)          saveImage();
